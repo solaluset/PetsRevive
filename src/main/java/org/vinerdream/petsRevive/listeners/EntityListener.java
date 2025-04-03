@@ -59,8 +59,11 @@ public class EntityListener implements Listener {
                         plugin.getConfig().getString("resurrection-item")
                 )
         ) {
-            if (plugin.getPetsManager().startResurrection(pet) && !event.getPlayer().getGameMode().equals(GameMode.CREATIVE)) {
-                item.setAmount(item.getAmount() - 1);
+            if (plugin.getPetsManager().startResurrection(pet)) {
+                if (!event.getPlayer().getGameMode().equals(GameMode.CREATIVE)) {
+                    item.setAmount(item.getAmount() - 1);
+                }
+                event.setCancelled(true);
             }
         }
     }
