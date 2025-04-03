@@ -1,0 +1,5 @@
+name: PetsRevive
+version: '1.0-SNAPSHOT'
+main: org.vinerdream.petsRevive.PetsRevive
+api-version: '1.21'
+authors: [ VinerDream ]

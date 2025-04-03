@@ -1,0 +1,18 @@
+resurrection-item: minecraft:totem_of_undying
+
+death-times:
+  default: 60
+  operator: 600
+
+resurrection-times:
+  default: 600
+  operator: 60
+
+messages:
+  unknown-player: "???"
+  will-die:
+    - '&cWill die in %time%'
+    - '&eOwner: %owner%'
+  will-resurrect:
+    - '&aWill resurrect in %time%'
+    - '&eOwner: %owner%'
