@@ -29,6 +29,9 @@ public class EntityListener implements Listener {
         if (ownerId == null) return;
         if (plugin.getPetsManager().registerDeath(pet)) {
             event.setCancelled(true);
+            for (Entity passenger : pet.getPassengers()) {
+                pet.removePassenger(passenger);
+            }
         }
     }
 
@@ -65,6 +68,8 @@ public class EntityListener implements Listener {
                 }
                 event.setCancelled(true);
             }
+        } else if (plugin.getPetsManager().isManaged(pet)) {
+            event.setCancelled(true);
         }
     }
 
