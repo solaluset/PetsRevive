@@ -152,7 +152,7 @@ public class PetsManager {
     }
 
     private Hologram createHologram(Tameable pet, String configKey, long endTime) {
-        final Hologram hologram = new Hologram(pet.getEyeLocation().clone().add(0, 1, 0), pet.getUniqueId().toString(), 0.3);
+        final Hologram hologram = new Hologram(pet.getEyeLocation().clone().add(0, 0.6, 0), pet.getUniqueId().toString(), 0.3);
         final String ownerName = Objects.requireNonNullElseGet(
                 Bukkit.getOfflinePlayer(Objects.requireNonNull(pet.getOwnerUniqueId())).getName(),
                 () -> Objects.requireNonNull(plugin.getConfig().getString("messages.unknown-player"))
