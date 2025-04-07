@@ -182,7 +182,6 @@ public class PetsManager {
         return plugin.getLuckPerms().getUserManager().loadUser(userId).thenApply(user -> {
             if (user == null) return times.getLast().getValue();
             List<String> groups = user.getNodes(NodeType.INHERITANCE).stream().map(InheritanceNode::getGroupName).toList();
-            plugin.getLogger().info(groups.toString());
             for (Map.Entry<String, Integer> entry : times) {
                 if (groups.contains(entry.getKey())) {
                     return entry.getValue();
