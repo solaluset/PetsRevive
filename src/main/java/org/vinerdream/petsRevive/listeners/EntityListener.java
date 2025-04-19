@@ -5,6 +5,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Tameable;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityTeleportEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
@@ -32,6 +33,14 @@ public class EntityListener implements Listener {
             for (Entity passenger : pet.getPassengers()) {
                 pet.removePassenger(passenger);
             }
+        }
+    }
+
+    @EventHandler
+    private void onDamage(EntityDamageEvent event) {
+        if (!(event.getEntity() instanceof Tameable pet)) return;
+        if (plugin.getPetsManager().isManaged(pet)) {
+            event.setCancelled(true);
         }
     }
 
