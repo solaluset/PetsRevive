@@ -9,7 +9,9 @@ import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Tameable;
+import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.vinerdream.petsRevive.PetsRevive;
 import org.vinerdream.petsRevive.data.PendingPetData;
@@ -24,30 +26,61 @@ public class PetsManager {
     private final PetsRevive plugin;
     private final NamespacedKey deathTimestampKey;
     private final NamespacedKey resurrectionTimestampKey;
+    private final NamespacedKey ownerKey;
     private final List<Map.Entry<String, Integer>> deathTimes = new ArrayList<>();
     private final List<Map.Entry<String, Integer>> resurrectionTimes = new ArrayList<>();
-    private final Map<Tameable, PendingPetData> pendingDeadPets = new HashMap<>();
-    private final Map<Tameable, PendingPetData> pendingResurrectingPets = new HashMap<>();
+    private final Map<LivingEntity, PendingPetData> pendingDeadPets = new HashMap<>();
+    private final Map<LivingEntity, PendingPetData> pendingResurrectingPets = new HashMap<>();
 
     public PetsManager(PetsRevive plugin) {
         this.plugin = plugin;
         this.deathTimestampKey = new NamespacedKey(plugin, "death-timestamp");
         this.resurrectionTimestampKey = new NamespacedKey(plugin, "resurrection-timestamp");
+        this.ownerKey = new NamespacedKey(plugin, "owner");
 
         loadTimes("death-times", deathTimes, true);
         loadTimes("resurrection-times", resurrectionTimes, false);
     }
 
-    public boolean registerDeath(Tameable pet) {
+    public UUID getOwnerUUID(LivingEntity entity) {
+        if (entity instanceof Tameable pet) {
+            return pet.getOwnerUniqueId();
+        }
+        PersistentDataContainer pdc = entity.getPersistentDataContainer();
+        String uuid = pdc.get(ownerKey, PersistentDataType.STRING);
+        if (uuid == null) {
+            return null;
+        }
+        return UUID.fromString(uuid);
+
+
+    }
+
+    public boolean setOwnerUUID(LivingEntity entity, UUID uuid) {
+        if (entity instanceof Tameable) {
+            return false;
+        }
+        if (getOwnerUUID(entity) != null) {
+            return false;
+        }
+        if (plugin.getConfig().getStringList("mob-blacklist").contains(entity.getType().getKey().toString())) {
+            return false;
+        }
+        PersistentDataContainer pdc = entity.getPersistentDataContainer();
+        pdc.set(ownerKey, PersistentDataType.STRING, uuid.toString());
+        return true;
+
+    }
+
+    public boolean registerDeath(LivingEntity pet) {
         if (pet.getPersistentDataContainer().has(deathTimestampKey)) {
             return false;
         }
-
         pet.setAI(false);
         pet.setSilent(true);
         pet.setInvulnerable(true);
 
-        getTime(pet.getOwnerUniqueId(), deathTimes).thenApply(
+        getTime(getOwnerUUID(pet), deathTimes).thenApply(
                 deathTime -> {
                     final long endTime = getCurrentSecond() + deathTime;
                     pet.getPersistentDataContainer().set(deathTimestampKey, PersistentDataType.LONG, endTime);
@@ -62,7 +95,7 @@ public class PetsManager {
         return true;
     }
 
-    private void resurrect(Tameable pet) {
+    private void resurrect(LivingEntity pet) {
         if (!pet.getPersistentDataContainer().has(resurrectionTimestampKey)) return;
 
         pet.setAI(true);
@@ -76,7 +109,7 @@ public class PetsManager {
         }
     }
 
-    private void kill(Tameable pet) {
+    private void kill(LivingEntity pet) {
         if (!pet.getPersistentDataContainer().has(deathTimestampKey)) return;
         pet.setHealth(0);
 
@@ -86,7 +119,7 @@ public class PetsManager {
         }
     }
 
-    public void handlePetUnload(Tameable pet) {
+    public void handlePetUnload(LivingEntity pet) {
         if (pendingDeadPets.containsKey(pet)) {
             final PendingPetData data = pendingDeadPets.remove(pet);
             data.hologram().remove();
@@ -99,7 +132,7 @@ public class PetsManager {
         }
     }
 
-    public void handlePetLoad(Tameable pet) {
+    public void handlePetLoad(LivingEntity pet) {
         final Long deathTimestamp = pet.getPersistentDataContainer().get(deathTimestampKey, PersistentDataType.LONG);
         if (deathTimestamp != null) {
             final long timeLeft = deathTimestamp - getCurrentSecond();
@@ -127,14 +160,14 @@ public class PetsManager {
         }
     }
 
-    public boolean startResurrection(Tameable pet) {
+    public boolean startResurrection(LivingEntity pet) {
         final PendingPetData deathData = pendingDeadPets.remove(pet);
         if (deathData == null) return false;
         deathData.hologram().remove();
         deathData.task().cancel();
         pet.getPersistentDataContainer().remove(deathTimestampKey);
 
-        getTime(pet.getOwnerUniqueId(), resurrectionTimes).thenApply(resurrectionTime -> {
+        getTime(getOwnerUUID(pet), resurrectionTimes).thenApply(resurrectionTime -> {
             final long endTime = getCurrentSecond() + resurrectionTime;
             pet.getPersistentDataContainer().set(resurrectionTimestampKey, PersistentDataType.LONG, endTime);
             pendingResurrectingPets.put(pet, new PendingPetData(
@@ -147,14 +180,14 @@ public class PetsManager {
         return true;
     }
 
-    public boolean isManaged(Tameable pet) {
+    public boolean isManaged(LivingEntity pet) {
         return pendingDeadPets.containsKey(pet) || pendingResurrectingPets.containsKey(pet);
     }
 
-    private Hologram createHologram(Tameable pet, String configKey, long endTime) {
+    private Hologram createHologram(LivingEntity pet, String configKey, long endTime) {
         final Hologram hologram = new Hologram(pet.getEyeLocation().clone().add(0, 0.6, 0), pet.getUniqueId().toString(), 0.3);
         final String ownerName = Objects.requireNonNullElseGet(
-                Bukkit.getOfflinePlayer(Objects.requireNonNull(pet.getOwnerUniqueId())).getName(),
+                Bukkit.getOfflinePlayer(Objects.requireNonNull(getOwnerUUID(pet))).getName(),
                 () -> Objects.requireNonNull(plugin.getConfig().getString("messages.unknown-player"))
         );
         hologram.addPlaceholder(new Placeholder(

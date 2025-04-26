@@ -16,3 +16,14 @@ messages:
   will-resurrect:
     - '&aWill resurrect in %time%'
     - '&eOwner: %owner%'
+  bind-success: "&aSuccess!"
+  bind-fail: "&cFAIL!"
+
+
+resurrection-name-tag: "Immortal"
+
+mob-blacklist:
+  - minecraft:warden
+  - minecraft:wither
+  - minecraft:ender_dragon
+
