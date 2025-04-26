@@ -1,11 +1,9 @@
 package org.vinerdream.petsRevive.listeners;
 
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Tameable;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -16,8 +14,6 @@ import org.bukkit.event.world.EntitiesLoadEvent;
 import org.bukkit.event.world.EntitiesUnloadEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
-import org.bukkit.persistence.PersistentDataType;
 import org.vinerdream.petsRevive.PetsRevive;
 import org.vinerdream.petsRevive.utils.ItemUtils;
 
@@ -27,12 +23,9 @@ import java.util.UUID;
 public class EntityListener implements Listener {
     private final PetsRevive plugin;
 
-
     public EntityListener(PetsRevive plugin) {
         this.plugin = plugin;
-
     }
-
 
     private boolean handleNameTagInteraction(PlayerInteractEntityEvent event) {
         if (!(event.getRightClicked() instanceof LivingEntity entity)) {
@@ -98,7 +91,6 @@ public class EntityListener implements Listener {
 
     @EventHandler
     private void onInteractEntity(PlayerInteractEntityEvent event) {
-        // Обробка бірки з назвою "test"
         if (handleNameTagInteraction(event)) {
             event.setCancelled(true);
             return;

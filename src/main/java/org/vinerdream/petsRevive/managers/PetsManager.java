@@ -8,7 +8,6 @@ import net.luckperms.api.node.types.InheritanceNode;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Tameable;
 import org.bukkit.persistence.PersistentDataContainer;
@@ -52,8 +51,6 @@ public class PetsManager {
             return null;
         }
         return UUID.fromString(uuid);
-
-
     }
 
     public boolean setOwnerUUID(LivingEntity entity, UUID uuid) {
@@ -69,7 +66,6 @@ public class PetsManager {
         PersistentDataContainer pdc = entity.getPersistentDataContainer();
         pdc.set(ownerKey, PersistentDataType.STRING, uuid.toString());
         return true;
-
     }
 
     public boolean registerDeath(LivingEntity pet) {
