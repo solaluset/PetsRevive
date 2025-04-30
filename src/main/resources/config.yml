@@ -19,11 +19,10 @@ messages:
   bind-success: "&aSuccess!"
   bind-fail: "&cFAIL!"
 
-
 resurrection-name-tag: "Immortal"
 
 mob-blacklist:
+  - minecraft:player
   - minecraft:warden
   - minecraft:wither
   - minecraft:ender_dragon
-

@@ -9,6 +9,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
 import org.bukkit.entity.Tameable;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
@@ -65,6 +66,22 @@ public class PetsManager {
         }
         PersistentDataContainer pdc = entity.getPersistentDataContainer();
         pdc.set(ownerKey, PersistentDataType.STRING, uuid.toString());
+        return true;
+    }
+
+    public boolean clearPlayer(Player player) {
+        PersistentDataContainer pdc = player.getPersistentDataContainer();
+
+        if (!pdc.has(ownerKey)) return false;
+
+        pdc.remove(ownerKey);
+        pdc.remove(deathTimestampKey);
+        pdc.remove(resurrectionTimestampKey);
+
+        player.setAI(true);
+        player.setSilent(false);
+        player.setInvulnerable(false);
+
         return true;
     }
 
