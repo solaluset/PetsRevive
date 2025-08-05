@@ -146,6 +146,10 @@ public class PetsManager {
     }
 
     public void handlePetLoad(LivingEntity pet) {
+        if (isManaged(pet)) {
+            return;
+        }
+
         final Long deathTimestamp = pet.getPersistentDataContainer().get(deathTimestampKey, PersistentDataType.LONG);
         if (deathTimestamp != null) {
             final long timeLeft = deathTimestamp - getCurrentSecond();

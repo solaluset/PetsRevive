@@ -1,20 +1,18 @@
 package org.vinerdream.petsRevive.listeners;
 
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-import org.bukkit.GameMode;
+import org.bukkit.*;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.EntityDeathEvent;
-import org.bukkit.event.entity.EntityTeleportEvent;
+import org.bukkit.event.entity.*;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.server.ServerLoadEvent;
 import org.bukkit.event.world.EntitiesLoadEvent;
 import org.bukkit.event.world.EntitiesUnloadEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.Material;
 import org.vinerdream.petsRevive.PetsRevive;
 import org.vinerdream.petsRevive.utils.ItemUtils;
 
@@ -69,6 +67,18 @@ public class EntityListener implements Listener {
         }
         if (plugin.getPetsManager().isManaged(entity)) {
             event.setCancelled(true);
+        }
+    }
+
+    // entities in spawn chunks do not trigger EntitiesLoadEvent
+    @EventHandler
+    private void onServerLoad(ServerLoadEvent event) {
+        for (World world : Bukkit.getWorlds()) {
+            for (Entity entity : world.getEntities()) {
+                if (entity instanceof LivingEntity pet) {
+                    plugin.getPetsManager().handlePetLoad(pet);
+                }
+            }
         }
     }
 
